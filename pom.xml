@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <name>EasyDispatch</name>
+    <description>A simple annotation based java dispatcher.</description>
+    <url>https://github.com/lrezek/EasyDispatch</url>
+    <inceptionYear>2016</inceptionYear>
+    <licenses>
+        <license>
+                <name>MIT License</name>
+                <url>http://www.opensource.org/licenses/mit-license.php</url>
+                <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+                <email>lukas@miratronix.com</email>
+                <name>Lukas Rezek</name>
+                <url>https://github.com/lrezek</url>
+                <id>lrezek</id>
+        </developer>
+    </developers>
+    
+    <groupId>com.lrezek</groupId>
+    <artifactId>EasyDispatch</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+</project>
