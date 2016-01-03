@@ -24,7 +24,7 @@
 package com.lrezek.easydispatch.strategy;
 
 import com.lrezek.easydispatch.exception.EasyDispatchException;
-import com.lrezek.easydispatch.handle.Handler;
+import com.lrezek.easydispatch.handle.HandlerMethod;
 
 /**
  * Simple synchronous dispatch strategy.
@@ -40,7 +40,7 @@ public class SynchronousDispatchStrategy implements DispatchStrategy
      * @param handler The handler.
      */
     @Override
-    public void dispatch(Object object, Handler handler) 
+    public void dispatch(Object object, HandlerMethod handler) 
     {
         try
         {

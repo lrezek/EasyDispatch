@@ -23,46 +23,72 @@
  */
 package com.lrezek.easydispatch.handle;
 
+import com.lrezek.easydispatch.annotation.Handles;
 import com.lrezek.easydispatch.exception.EasyDispatchException;
 import com.lrezek.easydispatch.strategy.DispatchStrategy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * Defines a handler method.
+ * Method wrapper for methods annotated with @Handles, or for "handles" methods
+ * in a class with a @Handles class annotation.
  * 
  * @author Lukas Rezek
  */
-public class Handler 
+public class HandlerMethod 
 {
-    /** The method to invoke to dispatch. */
-    private Method method;
+    /** The underlying reflection method. */
+    private final Method method;
     
-    /** The handler object. */
-    private final Object object;
+    /** The object the method is in. */
+    private final HandlerObject handlerObject;
     
     /** The dispatch strategy to use. */
-    private final Class<? extends DispatchStrategy> dispatchStrategy;
+    private Class<? extends DispatchStrategy> dispatchStrategy;
     
-    /** The class this handler handles. */
+    /** The class this handlerMethod handles. */
     private final Class handledClass;
     
     /**
-     * Constructs a handler from a handler object, method name, dispatch class,
-     * and dispatch strategy.
+     * Constructs a handler method from a handler object, method, and dispatch class.
      * 
-     * @param handlerObject The handler object.
-     * @param handledClass The class to handle.
-     * @param methodName The method name to use.
-     * @param dispatchStrategy The dispatch strategy. 
+     * @param object The parent HandlerObject.
+     * @param method The method name to use.
+     * @param annotation The annotation. 
+     * @throws EasyDispatchException If there is more than 1 class in the value of the @Handles.
+     */
+    public HandlerMethod(HandlerObject object, Method method, Handles annotation) throws EasyDispatchException
+    {
+        // If there is more than 1 class to handle, error
+        if(annotation.value() == null || annotation.value().length != 1)
+        {
+            throw new EasyDispatchException("A method-level @Handles must have a single class as its value");
+        }
+        
+        this.handledClass = annotation.value()[0];
+        this.method = method;
+        this.handlerObject = object;
+        this.setDispatchStrategy(annotation.dispatchStrategy());
+    }
+    
+    /**
+     * Constructs a handler from a handler object and @Handles annotation.
+     * 
+     * @param object The parent HandlerObject.
+     * @param handledClass The handled class 
+     * @param annotation The @Handles annotation.
      * @throws EasyDispatchException When the method is missing.
      */
-    public Handler(Object handlerObject, Class handledClass, String methodName, Class<? extends DispatchStrategy> dispatchStrategy) throws EasyDispatchException
+    public HandlerMethod(HandlerObject object, Class handledClass, Handles annotation) throws EasyDispatchException
     {
+        
+        // Get the method name or default if none defined
+        String methodName = annotation.method().isEmpty() ? object.getDefaultMethodName() : annotation.method();
+        
         try
         {
             // Try to get the specified method
-            this.method = handlerObject.getClass().getDeclaredMethod(methodName, handledClass);
+            this.method = object.getObject().getClass().getDeclaredMethod(methodName, handledClass);
         }
         catch(NoSuchMethodException e)
         {
@@ -70,24 +96,25 @@ public class Handler
         }
         
         this.handledClass = handledClass;
-        this.dispatchStrategy = dispatchStrategy;
-        this.object = handlerObject;
+        this.handlerObject = object;
+        this.setDispatchStrategy(annotation.dispatchStrategy());
     }
     
     /**
-     * Constructs a handler method from a handler object, method, and dispatch class.
+     * Sets the dispatch strategy, defaults if required.
      * 
-     * @param handlerObject The handler object.
-     * @param handledClass The class to handle.
-     * @param method The method name to use.
-     * @param dispatchStrategy The dispatch strategy. 
+     * @param dispatchStrategy The dispatch strategy.
      */
-    public Handler(Object handlerObject, Class handledClass, Method method, Class<? extends DispatchStrategy> dispatchStrategy)
+    private void setDispatchStrategy(Class<? extends DispatchStrategy> dispatchStrategy)
     {
-        this.handledClass = handledClass;
-        this.method = method;
-        this.dispatchStrategy = dispatchStrategy;
-        this.object = handlerObject;
+        if(dispatchStrategy == DispatchStrategy.class)
+        {
+            this.dispatchStrategy = this.handlerObject.getDefaultDispatchStrategy();
+        }
+        else
+        {
+            this.dispatchStrategy = dispatchStrategy;
+        }
     }
     
     /**
@@ -100,7 +127,7 @@ public class Handler
     {
         try
         {
-            this.method.invoke(this.object, object);
+            this.method.invoke(this.handlerObject.getObject(), object);
         }
         catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
@@ -145,6 +172,6 @@ public class Handler
      */
     public Object getHandlerObject()
     {
-        return this.object;
+        return this.handlerObject;
     }
 }

@@ -24,8 +24,8 @@
 package com.lrezek.easydispatch;
 
 import com.lrezek.easydispatch.exception.EasyDispatchException;
-import com.lrezek.easydispatch.handle.HandlerClass;
-import com.lrezek.easydispatch.handle.Handler;
+import com.lrezek.easydispatch.handle.HandlerObject;
+import com.lrezek.easydispatch.handle.HandlerMethod;
 import com.lrezek.easydispatch.strategy.DispatchStrategy;
 import com.lrezek.easydispatch.strategy.SynchronousDispatchStrategy;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Lukas Rezek
  */
 public class EasyDispatch 
-{
+{   
     /** The dispatch strategy to use if it's not specified in the annotation. */
     private Class<? extends DispatchStrategy> defaultDispatchStrategyClass;
     
@@ -50,7 +50,7 @@ public class EasyDispatch
     private final Map<Class<? extends DispatchStrategy>, DispatchStrategy> dispatchStategies = new HashMap<>();
     
     /** Map of handler objects. */
-    private final Map<Class, Collection<HandlerClass>> handlerClasses = new HashMap();
+    private final Map<Class, Collection<HandlerObject>> handlerClasses = new HashMap();
     
     /** 
      * Constructor for the Dispatcher.
@@ -71,13 +71,13 @@ public class EasyDispatch
      */
     public void dispatch(Object object)
     {
-        Collection<HandlerClass> handlers = this.handlerClasses.get(object.getClass());
+        Collection<HandlerObject> handlers = this.handlerClasses.get(object.getClass());
         
         if(handlers != null && !handlers.isEmpty())
         {
-            for(HandlerClass handlerClass : handlers)
+            for(HandlerObject handlerClass : handlers)
             {
-                Handler h = handlerClass.getHandler(object);
+                HandlerMethod h = handlerClass.getHandler(object);
                 
                 this.dispatchStategies.get(h.getDispatchStrategy()).dispatch(object, h);
             }
@@ -123,7 +123,7 @@ public class EasyDispatch
     public void addHandler(Object handler) throws EasyDispatchException
     {
         // Create a handler class object
-        HandlerClass handlerClass = new HandlerClass(handler, this.defaultDispatchStrategyClass, this.defaultMethodName);
+        HandlerObject handlerClass = new HandlerObject(handler, this.defaultDispatchStrategyClass, this.defaultMethodName);
         
         // Add the handler class mapping for everything it handles
         for(Class handledClass : handlerClass.getHandledClasses())

@@ -32,14 +32,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains a mapping of handlers inside a class.
+ * Object wrapper for an object with @Handles annotations.
  * 
  * @author Lukas Rezek
  */
-public class HandlerClass 
+public class HandlerObject 
 {                
-    /** The handler methods in this class. */
-    private final Map<Class, Handler> handlers = new HashMap<>();
+    /** Map of handled classes to Handler methods. */
+    private final Map<Class, HandlerMethod> handlers = new HashMap<>();
         
     /** The default dispatch strategy to use. */
     private final Class<? extends DispatchStrategy> defaultDispatchStrategy;
@@ -47,23 +47,26 @@ public class HandlerClass
     /** The default method name to use. */
     private final String defaultMethodName;
     
-    /** The object to use as the handler. */
-    private final Object handlerObject;
+    /** The underlying object. */
+    private final Object object;
     
     /**
-     * Constructs the entry with an annotation.
+     * Constructs a HandlerObject from an object, a default dispatch strategy, 
+     * and a default method name.
      * 
-     * @param handlerObject The handler object.
+     * @param object The object to wrap.
      * @param defaultDispatchStrategy The default dispatch strategy to use.
      * @param defaultMethodName The default method name to use.
-     * @throws EasyDispatchException When no Handles annotation is found.
+     * @throws EasyDispatchException When no valid @Handles annotations are found.
      */
-    public HandlerClass(Object handlerObject, Class<? extends DispatchStrategy> defaultDispatchStrategy, String defaultMethodName) throws EasyDispatchException
+    public HandlerObject(Object object, Class<? extends DispatchStrategy> defaultDispatchStrategy, String defaultMethodName) throws EasyDispatchException
     {                
         // Store defaults
         this.defaultDispatchStrategy = defaultDispatchStrategy;
         this.defaultMethodName = defaultMethodName;
-        this.handlerObject = handlerObject;
+        
+        // Store the underlying object
+        this.object = object;
         
         // Handle class annotations
         this.handleClassAnnotations();
@@ -74,7 +77,7 @@ public class HandlerClass
         // If we have no annotations, throw an exception
         if(this.handlers.isEmpty())
         {
-            throw new EasyDispatchException(handlerObject.getClass() + " does not contain a valid @Handles annotation.");
+            throw new EasyDispatchException(object.getClass() + " does not contain a valid @Handles annotation.");
         }
     }
         
@@ -84,7 +87,7 @@ public class HandlerClass
     private void handleClassAnnotations()
     {
         // Get all the class annotations
-        Handles[] annotations = this.handlerObject.getClass().getAnnotationsByType(Handles.class);
+        Handles[] annotations = this.object.getClass().getAnnotationsByType(Handles.class);
         
         // Handle all the class annotations
         if(annotations != null && annotations.length != 0)
@@ -106,18 +109,14 @@ public class HandlerClass
         Class[] handledClasses = annotation.value();
         
         if(handledClasses != null && handledClasses.length != 0)
-        {
-            // Get the method name and dispatch strategy from the annotation
-            String methodName = annotation.method().isEmpty() ? this.defaultMethodName : annotation.method();
-            Class dispatchStrategy = annotation.dispatchStrategy() == DispatchStrategy.class ? this.defaultDispatchStrategy : annotation.dispatchStrategy();
-            
+        {            
             // Loop over the handled classes
             for(Class handledClass : handledClasses)
             {
                 try
                 {
                     // Attempt to construct the handlerMethod and put it on the map
-                    this.handlers.put(handledClass, new Handler(this.handlerObject, handledClass, methodName, dispatchStrategy));
+                    this.handlers.put(handledClass, new HandlerMethod(this, handledClass, annotation));
                 }
                 catch(EasyDispatchException e)
                 {
@@ -133,7 +132,7 @@ public class HandlerClass
     private void handleMethodAnnotations()
     {
         // Get all the methods
-        Method[] methods = this.handlerObject.getClass().getDeclaredMethods();
+        Method[] methods = this.object.getClass().getDeclaredMethods();
         
         if(methods != null && methods.length != 0)
         {
@@ -169,39 +168,62 @@ public class HandlerClass
      * @param method The method.
      */
     private void handleMethodAnnotation(Handles annotation, Method method) throws EasyDispatchException
-    {
-        Class[] handledClasses = annotation.value();
+    {             
+        // Attempt to construct the handlerMethod
+        HandlerMethod handlerMethod = new HandlerMethod(this, method, annotation);
         
-        if(handledClasses == null || handledClasses.length != 1)
-        {
-            throw new EasyDispatchException("A method-level @Handles must have a single class as its value");
-        }
-        
-        // Prepapre the dispatch strategy
-        Class dispatchStrategy = annotation.dispatchStrategy() == DispatchStrategy.class ? this.defaultDispatchStrategy : annotation.dispatchStrategy();
-            
-        // Attempt to construct the handlerMethod and put it on the map
-        this.handlers.put(handledClasses[0], new Handler(this.handlerObject, handledClasses[0], method, dispatchStrategy));
+        // Put it on the map
+        this.handlers.put(handlerMethod.getHandledClass(), handlerMethod);
     }
     
     /**
-     * Gets the handler method for the dispatched object.
+     * Gets the handler method for an object.
      * 
      * @param object The object.
-     * @return The handler method.
+     * @return The handler method, if there is one (Null otherwise).
      */
-    public Handler getHandler(Object object)
+    public HandlerMethod getHandler(Object object)
     {
         return this.handlers.get(object.getClass());
     }
     
     /**
-     * Gets all the classes handled by this handler class.
+     * Gets all the classes handled by this HandlerObject.
      * 
      * @return The collection of handled classes.
      */
     public Collection<Class> getHandledClasses()
     {
         return this.handlers.keySet();
+    }
+    
+    /**
+     * Gets the underlying object.
+     * 
+     * @return The object.
+     */
+    public Object getObject()
+    {
+        return this.object;
+    }
+    
+    /**
+     * Gets the default dispatch strategy.
+     * 
+     * @return The dispatch strategy.
+     */
+    public Class<? extends DispatchStrategy> getDefaultDispatchStrategy()
+    {
+        return this.defaultDispatchStrategy;
+    }
+    
+    /**
+     * Gets the default method name.
+     * 
+     * @return The method name.
+     */
+    public String getDefaultMethodName()
+    {
+        return this.defaultMethodName;
     }
 }

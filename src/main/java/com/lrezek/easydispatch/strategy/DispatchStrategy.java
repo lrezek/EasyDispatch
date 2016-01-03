@@ -23,7 +23,7 @@
  */
 package com.lrezek.easydispatch.strategy;
 
-import com.lrezek.easydispatch.handle.Handler;
+import com.lrezek.easydispatch.handle.HandlerMethod;
 
 /**
  * Abstract class defining a dispatch strategy.
@@ -38,5 +38,5 @@ public interface DispatchStrategy
      * @param object The object to dispatch.
      * @param Handler The handler to dispatch to.
      */
-    void dispatch(Object object, Handler Handler);
+    void dispatch(Object object, HandlerMethod Handler);
 }
