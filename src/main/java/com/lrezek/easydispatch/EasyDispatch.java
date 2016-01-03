@@ -41,7 +41,7 @@ import java.util.Map;
 public class EasyDispatch 
 {
     /** The dispatch strategy to use if it's not specified in the annotation. */
-    private Class defaultDispatchStrategyClass;
+    private Class<? extends DispatchStrategy> defaultDispatchStrategyClass;
     
     /** The default method name. */
     private String defaultMethodName = "handle";
