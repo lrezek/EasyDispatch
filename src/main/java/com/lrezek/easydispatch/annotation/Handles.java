@@ -23,7 +23,7 @@
  */
 package com.lrezek.easydispatch.annotation;
 
-import com.lrezek.easydispatch.stategy.DispatchStrategy;
+import com.lrezek.easydispatch.strategy.DispatchStrategy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

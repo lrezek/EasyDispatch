@@ -25,7 +25,7 @@ package com.lrezek.easydispatch.handle;
 
 import com.lrezek.easydispatch.annotation.Handles;
 import com.lrezek.easydispatch.exception.EasyDispatchException;
-import com.lrezek.easydispatch.stategy.DispatchStrategy;
+import com.lrezek.easydispatch.strategy.DispatchStrategy;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;

@@ -21,31 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.stategy;
+package com.lrezek.easydispatch.strategy;
 
-import com.lrezek.easydispatch.exception.EasyDispatchException;
 import com.lrezek.easydispatch.handle.Handler;
 
 /**
- * Simple synchronous dispatch strategy.
+ * Abstract class defining a dispatch strategy.
  * 
  * @author Lukas Rezek
  */
-public class SynchronousDispatchStrategy implements DispatchStrategy
+public interface DispatchStrategy 
 {
     /**
-     * Dispatches the object to the handler synchronously.
+     * Defines a dispatch method.
      * 
-     * @param object The object.
-     * @param handler The handler.
+     * @param object The object to dispatch.
+     * @param Handler The handler to dispatch to.
      */
-    @Override
-    public void dispatch(Object object, Handler handler) 
-    {
-        try
-        {
-            handler.dispatch(object);
-        }
-        catch(EasyDispatchException e){}
-    }
+    void dispatch(Object object, Handler Handler);
 }
