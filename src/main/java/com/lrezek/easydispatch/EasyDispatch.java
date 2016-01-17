@@ -23,117 +23,167 @@
  */
 package com.lrezek.easydispatch;
 
-import com.lrezek.easydispatch.exception.EasyDispatchException;
-import com.lrezek.easydispatch.handle.HandlerObject;
-import com.lrezek.easydispatch.handle.HandlerMethod;
-import com.lrezek.easydispatch.strategy.DispatchStrategy;
-import com.lrezek.easydispatch.strategy.SynchronousDispatchStrategy;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import com.lrezek.easydispatch.dispatch.result.DispatchResults;
+import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategyRegistry;
+import com.lrezek.easydispatch.handle.HandlerRegistry;
+import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategy;
+import com.lrezek.easydispatch.dispatch.strategy.SynchronousDispatchStrategy;
 
 /**
- * Main dispatcher class.
+ * Main entry point for EasyDispatch.
  * 
  * @author Lukas Rezek
  */
 public class EasyDispatch 
-{   
-    /** The dispatch strategy to use if it's not specified in the annotation. */
-    private Class<? extends DispatchStrategy> defaultDispatchStrategyClass;
+{           
+    /** Dispatch strategy registry. */
+    private final DispatchStrategyRegistry dispatchStrategies = new DispatchStrategyRegistry();
     
-    /** The default method name. */
-    private String defaultMethodName = "handle";
-    
-    /** Map of available dispatch strategies. */
-    private final Map<Class<? extends DispatchStrategy>, DispatchStrategy> dispatchStategies = new HashMap<>();
-    
-    /** Map of handler objects. */
-    private final Map<Class, Collection<HandlerObject>> handlerClasses = new HashMap();
+    /** Handler registry. */
+    private final HandlerRegistry handlers = new HandlerRegistry();
     
     /** 
-     * Constructor for the Dispatcher.
+     * Constructor for the dispatcher with default settings.
      */
     public EasyDispatch()
     {
         // Add the built in dispatch strategies
-        this.addDispatchStrategy(new SynchronousDispatchStrategy());
+        this.dispatchStrategies.add(new SynchronousDispatchStrategy())
+            .setDefault(SynchronousDispatchStrategy.class); // Set the default dispatch strategy
+    }
+    
+    /**
+     * Dispatches an object with the default dispatch strategy.
+     * 
+     * Basic dispatch method. The default dispatch strategy will only be used if 
+     * the handler annotation does not contain a dispatch strategy parameter.
+     * 
+     * @param object The object to dispatch.
+     * @return The dispatch results.
+     */
+    public DispatchResults dispatch(Object object)
+    {
+        // Dispatch the object with the configured default dispatch strategy
+        return this.dispatch(object, this.dispatchStrategies.getDefault());
+    }
+    
+    /**
+     * Dispatches an object, overriding the default dispatch strategy.
+     * 
+     * Dispatches an object with the specified default dispatch strategy. The 
+     * specified default strategy will be used if the annotation does not specify
+     * a strategy of its own.
+     * 
+     * @param object The object to dispatch.
+     * @param defaultDispatchStrategyClass The default dispatch strategy class to use.
+     * @return The dispatch results.
+     */
+    public DispatchResults dispatch(Object object, Class<? extends DispatchStrategy> defaultDispatchStrategyClass)
+    {         
+        return this.dispatch(object, this.dispatchStrategies.get(defaultDispatchStrategyClass));
+    }
+    
+    /**
+     * Dispatches an object, overriding the default dispatch strategy.
+     * 
+     * Dispatches an object with the specified default dispatch strategy. The 
+     * specified default strategy will be used if the annotation does not specify
+     * a strategy of its own.
+     * 
+     * @param object The object to dispatch.
+     * @param defaultDispatchStrategy The default dispatch strategy to use.
+     * @return The dispatch results.
+     */
+    public DispatchResults dispatch(Object object, DispatchStrategy defaultDispatchStrategy)
+    {
+        // Prepare dispatch results
+        DispatchResults results = new DispatchResults();
         
-        // Set the default dispatch strategy
-        this.setDefaultDispatchStrategy(SynchronousDispatchStrategy.class);
-    }
-    
-    /**
-     * Dispatches an object.
-     * 
-     * @param object The object.
-     */
-    public void dispatch(Object object)
-    {
-        Collection<HandlerObject> handlers = this.handlerClasses.get(object.getClass());
-        
-        if(handlers != null && !handlers.isEmpty())
-        {
-            for(HandlerObject handlerClass : handlers)
-            {
-                HandlerMethod h = handlerClass.getHandler(object);
-                
-                this.dispatchStategies.get(h.getDispatchStrategy()).dispatch(object, h);
-            }
-        }
-    }
-    
-    /**
-     * Sets the default dispatch strategy from the set of built in ones.
-     * 
-     * @param defaultDispatchStrategyClass The default strategy to use.
-     */
-    public void setDefaultDispatchStrategy(Class<? extends DispatchStrategy> defaultDispatchStrategyClass)
-    {
-        this.defaultDispatchStrategyClass = defaultDispatchStrategyClass;
-    }
-    
-    /**
-     * Sets the default method name to use.
-     * 
-     * @param defaultMethodName The default method name.
-     */
-    public void setDefaultMethodName(String defaultMethodName)
-    {
-        this.defaultMethodName = defaultMethodName;
-    }
-    
-    /**
-     * Adds a dispatch strategy to the dispatcher so it can be used in annotations.
-     * 
-     * @param dispatchStrategy The strategy to add.
-     */
-    public void addDispatchStrategy(DispatchStrategy dispatchStrategy)
-    {
-        this.dispatchStategies.put(dispatchStrategy.getClass(), dispatchStrategy);
-    }
-    
-    /**
-     * Adds a handler.
-     * 
-     * @param handler The handler object.
-     * @throws EasyDispatchException If the handler has no valid @Handles annotations.
-     */
-    public void addHandler(Object handler) throws EasyDispatchException
-    {
-        // Create a handler class object
-        HandlerObject handlerClass = new HandlerObject(handler, this.defaultDispatchStrategyClass, this.defaultMethodName);
-        
-        // Add the handler class mapping for everything it handles
-        for(Class handledClass : handlerClass.getHandledClasses())
-        {
-            if(!this.handlerClasses.containsKey(handledClass))
-            {
-                this.handlerClasses.put(handledClass, new ArrayList<>());
-            }
+        // Loop over all the handlers for the object
+        this.handlers.get(object).forEach(handler -> handler.getHandles(object).forEach(handle -> {
             
-            this.handlerClasses.get(handledClass).add(handlerClass);
-        }
+            // Get the annotation specified dispatch strategy, fall back to the default specified
+            DispatchStrategy dispatchStrategy = this.dispatchStrategies.get(handle.getDispatchStrategy(), defaultDispatchStrategy);
+
+            // Dispatch the object and store the result
+            results.add(dispatchStrategy.dispatch(handle, object, results));
+            
+        }));
+        
+        return results;
+    }
+    
+    /**
+     * Dispatches an object, using the specified dispatch strategy class.
+     * 
+     * Dispatches an object with the specified dispatch strategy class. This
+     * dispatch strategy will be used, regardless of the annotations specified
+     * dispatch strategy.
+     * 
+     * @param object The object to dispatch.
+     * @param dispatchStrategyClass The dispatch strategy class to use.
+     * @return The dispatch results.
+     */
+    public DispatchResults dispatchWith(Object object, Class<? extends DispatchStrategy> dispatchStrategyClass)
+    {        
+        return this.dispatchWith(object, this.dispatchStrategies.get(dispatchStrategyClass));
+    }
+    
+    /**
+     * Dispatches an object, using the specified dispatch strategy.
+     * 
+     * Dispatches an object with the specified dispatch strategy class. This
+     * dispatch strategy will be used, regardless of the annotations specified
+     * dispatch strategy.
+     * 
+     * @param object The object to dispatch.
+     * @param dispatchStrategy The dispatch strategy class.
+     * @return The dispatch results.
+     */
+    public DispatchResults dispatchWith(Object object, DispatchStrategy dispatchStrategy)
+    {   
+        // Prepare dispatch results
+        DispatchResults results = new DispatchResults();
+        
+        // Loop over all handles
+        this.handlers.get(object).forEach(handler -> handler.getHandles(object).forEach(handle -> {
+            
+            // Dispatch the object and store the result
+            results.add(dispatchStrategy.dispatch(handle, object, null));      
+            
+        }));
+        
+        return results;
+    }
+    
+    /**
+     * Shortcut for a fully synchronous dispatch.
+     * 
+     * @param object The object to dispatch.
+     * @return The dispatch results.
+     */        
+    public DispatchResults synchronousDispatch(Object object)
+    {
+        return this.dispatchWith(object, SynchronousDispatchStrategy.class);
+    }
+   
+    /**
+     * Gets the dispatch strategies registry.
+     * 
+     * @return The dispatch strategies registry.
+     */
+    public DispatchStrategyRegistry dispatchStrategies()
+    {
+        return this.dispatchStrategies;
+    }
+    
+    /**
+     * Gets the handler registry.
+     * 
+     * @return The dispatch strategies registry.
+     */
+    public HandlerRegistry handlers()
+    {
+        return this.handlers;
     }
 }

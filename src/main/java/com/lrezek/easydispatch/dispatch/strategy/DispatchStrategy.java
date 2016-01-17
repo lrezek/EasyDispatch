@@ -21,28 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.annotation;
+package com.lrezek.easydispatch.dispatch.strategy;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.lrezek.easydispatch.dispatch.result.DispatchResult;
+import com.lrezek.easydispatch.dispatch.result.DispatchResults;
+import com.lrezek.easydispatch.handle.Handle;
 
 /**
- * Container for repeating handles annotations.
+ * Interface defining a dispatch strategy.
  * 
  * @author Lukas Rezek
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Inherited
-public @interface HandlesContainer 
+public interface DispatchStrategy 
 {
-    /** 
-     * Array of @Handles annotations in this container. 
+    /**
+     * Defines a dispatch method.
      * 
-     * @return The array.
+     * @param handle The handle to dispatch to.
+     * @param object The object to dispatch.
+     * @param previousResults Previous dispatch results for this dispatch.
+     * @return Dispatch result object.
      */
-    Handles[] value();
+    DispatchResult dispatch(Handle handle, Object object, final DispatchResults previousResults);
 }

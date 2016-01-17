@@ -21,22 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.strategy;
+package com.lrezek.easydispatch.dispatch.result;
 
-import com.lrezek.easydispatch.handle.HandlerMethod;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
- * Abstract class defining a dispatch strategy.
+ * Defines a collection of dispatch results.
  * 
  * @author Lukas Rezek
  */
-public interface DispatchStrategy 
+public class DispatchResults
 {
+    /** The underlying collection of dispatch results. */
+    private final Collection<DispatchResult> results = new LinkedList<>();
+
     /**
-     * Defines a dispatch method.
+     * Gets the underlying collection of dispatch results.
      * 
-     * @param object The object to dispatch.
-     * @param Handler The handler to dispatch to.
+     * @return Collection of dispatch results.
      */
-    void dispatch(Object object, HandlerMethod Handler);
+    public Collection<DispatchResult> getResults() 
+    {
+        return results;
+    }
+    
+    /**
+     * Adds a dispatch result to the results collection.
+     * 
+     * @param dispatchResult The dispatch result to add.
+     */
+    public void add(DispatchResult dispatchResult)
+    {
+        this.results.add(dispatchResult);
+    }
+    
 }

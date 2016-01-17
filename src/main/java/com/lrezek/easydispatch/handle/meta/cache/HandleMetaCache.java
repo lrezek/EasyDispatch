@@ -21,28 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.annotation;
+package com.lrezek.easydispatch.handle.meta.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.lrezek.easydispatch.handle.meta.HandleMeta;
+import java.util.Collection;
 
 /**
- * Container for repeating handles annotations.
+ * Defines a handle meta cache. An implementation of this is used to get handle 
+ * meta objects so we don't have to do reflection scanning for every handler. 
  * 
  * @author Lukas Rezek
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Inherited
-public @interface HandlesContainer 
-{
-    /** 
-     * Array of @Handles annotations in this container. 
+public interface HandleMetaCache
+{    
+    /**
+     * Determines if a cache entry exists for the specified class.
      * 
-     * @return The array.
+     * @param cls The class.
+     * @return True if there is a cache entry, false otherwise.
      */
-    Handles[] value();
+    boolean contains(Class cls);
+    
+    /**
+     * Gets the handle meta collection for the class, or null if not found.
+     * 
+     * @param cls The class.
+     * @return The cached handle meta information, or null if not found.
+     */
+    Collection<HandleMeta> get(Class cls);
+    
+    /**
+     * Puts a collection of handle meta objects on the cache, for the specified
+     * class.
+     * 
+     * @param cls The class.
+     * @param handlerDataCollection The handle meta information for the class. 
+     */
+    void put(Class cls, Collection<HandleMeta> handlerDataCollection);
+    
+    /**
+     * Clears the cache.
+     */
+    void clear();
 }

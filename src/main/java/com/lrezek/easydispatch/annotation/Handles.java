@@ -23,7 +23,7 @@
  */
 package com.lrezek.easydispatch.annotation;
 
-import com.lrezek.easydispatch.strategy.DispatchStrategy;
+import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
 public @interface Handles 
 {
     /**
-     * The classes the annotated class or method handles.
+     * The dispatched classes the annotated class or method handles.
      * 
      * @return Array of classes.
      */

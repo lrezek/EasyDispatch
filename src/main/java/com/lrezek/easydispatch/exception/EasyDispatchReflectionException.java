@@ -21,31 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.strategy;
-
-import com.lrezek.easydispatch.exception.EasyDispatchException;
-import com.lrezek.easydispatch.handle.HandlerMethod;
+package com.lrezek.easydispatch.exception;
 
 /**
- * Simple synchronous dispatch strategy.
+ * Defines an EasyDispatch reflection exception. This is thrown when a reflection
+ * problem is encountered.
  * 
  * @author Lukas Rezek
  */
-public class SynchronousDispatchStrategy implements DispatchStrategy
+public class EasyDispatchReflectionException extends EasyDispatchException
 {
     /**
-     * Dispatches the object to the handler synchronously.
+     * Construct with a cause.
      * 
-     * @param object The object.
-     * @param handler The handler.
+     * @param cause The cause.
      */
-    @Override
-    public void dispatch(Object object, HandlerMethod handler) 
+    public EasyDispatchReflectionException(Throwable cause)
     {
-        try
-        {
-            handler.dispatch(object);
-        }
-        catch(EasyDispatchException e){}
+        super(cause);
+    }
+    
+    /**
+     * Construct with a message.
+     * 
+     * @param message The message.
+     */
+    public EasyDispatchReflectionException(String message)
+    {
+        super(message);
+    }
+    
+    /**
+     * Construct with a message and a cause.
+     * 
+     * @param message The message.
+     * @param cause The cause.
+     */
+    public EasyDispatchReflectionException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

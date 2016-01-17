@@ -24,7 +24,7 @@
 package com.lrezek.easydispatch.exception;
 
 /**
- * Defines a general easy dispatch exception.
+ * Defines a general Easy Dispatch exception.
  * 
  * @author Lukas Rezek
  */
