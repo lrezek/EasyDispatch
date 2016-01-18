@@ -23,6 +23,7 @@
  */
 package com.lrezek.easydispatch;
 
+import com.lrezek.easydispatch.dispatch.Dispatcher;
 import com.lrezek.easydispatch.dispatch.result.DispatchResults;
 import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategyRegistry;
 import com.lrezek.easydispatch.handle.HandlerRegistry;
@@ -36,21 +37,11 @@ import com.lrezek.easydispatch.dispatch.strategy.SynchronousDispatchStrategy;
  */
 public class EasyDispatch 
 {           
-    /** Dispatch strategy registry. */
-    private final DispatchStrategyRegistry dispatchStrategies = new DispatchStrategyRegistry();
-    
     /** Handler registry. */
     private final HandlerRegistry handlers = new HandlerRegistry();
     
-    /** 
-     * Constructor for the dispatcher with default settings.
-     */
-    public EasyDispatch()
-    {
-        // Add the built in dispatch strategies
-        this.dispatchStrategies.add(new SynchronousDispatchStrategy())
-            .setDefault(SynchronousDispatchStrategy.class); // Set the default dispatch strategy
-    }
+    /** The dispatcher to use. */
+    private final Dispatcher dispatcher = new Dispatcher();
     
     /**
      * Dispatches an object with the default dispatch strategy.
@@ -64,7 +55,7 @@ public class EasyDispatch
     public DispatchResults dispatch(Object object)
     {
         // Dispatch the object with the configured default dispatch strategy
-        return this.dispatch(object, this.dispatchStrategies.getDefault());
+        return this.dispatcher.dispatch(object, this.handlers.get(object));
     }
     
     /**
@@ -80,7 +71,7 @@ public class EasyDispatch
      */
     public DispatchResults dispatch(Object object, Class<? extends DispatchStrategy> defaultDispatchStrategyClass)
     {         
-        return this.dispatch(object, this.dispatchStrategies.get(defaultDispatchStrategyClass));
+        return this.dispatcher.dispatch(object, this.handlers.get(object), defaultDispatchStrategyClass);
     }
     
     /**
@@ -96,21 +87,7 @@ public class EasyDispatch
      */
     public DispatchResults dispatch(Object object, DispatchStrategy defaultDispatchStrategy)
     {
-        // Prepare dispatch results
-        DispatchResults results = new DispatchResults();
-        
-        // Loop over all the handlers for the object
-        this.handlers.get(object).forEach(handler -> handler.getHandles(object).forEach(handle -> {
-            
-            // Get the annotation specified dispatch strategy, fall back to the default specified
-            DispatchStrategy dispatchStrategy = this.dispatchStrategies.get(handle.getDispatchStrategy(), defaultDispatchStrategy);
-
-            // Dispatch the object and store the result
-            results.add(dispatchStrategy.dispatch(handle, object, results));
-            
-        }));
-        
-        return results;
+        return this.dispatcher.dispatch(object, this.handlers.get(object), defaultDispatchStrategy);
     }
     
     /**
@@ -126,7 +103,7 @@ public class EasyDispatch
      */
     public DispatchResults dispatchWith(Object object, Class<? extends DispatchStrategy> dispatchStrategyClass)
     {        
-        return this.dispatchWith(object, this.dispatchStrategies.get(dispatchStrategyClass));
+        return this.dispatcher.dispatchWith(object, this.handlers.get(object), dispatchStrategyClass);
     }
     
     /**
@@ -142,18 +119,7 @@ public class EasyDispatch
      */
     public DispatchResults dispatchWith(Object object, DispatchStrategy dispatchStrategy)
     {   
-        // Prepare dispatch results
-        DispatchResults results = new DispatchResults();
-        
-        // Loop over all handles
-        this.handlers.get(object).forEach(handler -> handler.getHandles(object).forEach(handle -> {
-            
-            // Dispatch the object and store the result
-            results.add(dispatchStrategy.dispatch(handle, object, null));      
-            
-        }));
-        
-        return results;
+        return this.dispatcher.dispatchWith(object, this.handlers.get(object), dispatchStrategy);
     }
     
     /**
@@ -167,6 +133,11 @@ public class EasyDispatch
         return this.dispatchWith(object, SynchronousDispatchStrategy.class);
     }
    
+    public Dispatcher dispatcher()
+    {
+        return this.dispatcher;
+    }
+    
     /**
      * Gets the dispatch strategies registry.
      * 
@@ -174,7 +145,7 @@ public class EasyDispatch
      */
     public DispatchStrategyRegistry dispatchStrategies()
     {
-        return this.dispatchStrategies;
+        return this.dispatcher.dispatchStrategies();
     }
     
     /**

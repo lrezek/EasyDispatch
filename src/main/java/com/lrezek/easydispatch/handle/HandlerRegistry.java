@@ -29,9 +29,9 @@ import com.lrezek.easydispatch.handle.meta.HandleMeta;
 import com.lrezek.easydispatch.handle.meta.HandleMetaFactory;
 import com.lrezek.easydispatch.handle.meta.cache.ConcurrentMapHandleMetaCache;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class HandlerRegistry
 {    
     /** Map of handled class -> Handlers. */
-    private final Map<Class, Collection<Handler>> handlers = new HashMap();
+    private final Map<Class, List<Handler>> handlers = new HashMap();
     
     /** Meta factory to use for creating meta information. */
     private final HandleMetaFactory metaFactory = new HandleMetaFactory();
@@ -77,7 +77,7 @@ public class HandlerRegistry
         if(handlers != null && handlers.length != 0)
         {
             // Prepare a collection of handlers to add
-            Collection<Handler> handlersToAdd = new LinkedList<>();
+            List<Handler> handlersToAdd = new LinkedList<>();
             
             // Loop over the supplied handlers and convert them all to real handlers
             for(Object handler : handlers)
@@ -156,16 +156,16 @@ public class HandlerRegistry
      * @param object Dispatch object.
      * @return The handlers.
      */
-    public Collection<Handler> get(Object object)
+    public List<Handler> get(Object object)
     {
-        Collection<Handler> handlerCollection = this.handlers.get(object.getClass());
+        List<Handler> handlerList = this.handlers.get(object.getClass());
         
-        if(handlerCollection == null)
+        if(handlerList == null)
         {
-            handlerCollection = new LinkedList<>();
+            handlerList = new LinkedList<>();
         }
         
-        return handlerCollection;
+        return handlerList;
     }
     
     /**
@@ -173,9 +173,9 @@ public class HandlerRegistry
      * 
      * @return Collection of all handlers.
      */
-    public Collection<Handler> get()
+    public List<Handler> get()
     {
-        Collection<Handler> toReturn = new LinkedList<>();
+        List<Handler> toReturn = new LinkedList<>();
         
         this.handlers.entrySet().forEach(handlerCollectionEntry -> handlerCollectionEntry.getValue().forEach(handler -> {
             toReturn.add(handler);
@@ -252,7 +252,7 @@ public class HandlerRegistry
      * @param cls The class to get meta information for.
      * @return The collection of meta information for the class.
      */
-    private Collection<HandleMeta> getMetaInfo(Class cls) throws EasyDispatchReflectionException
+    private List<HandleMeta> getMetaInfo(Class cls) throws EasyDispatchReflectionException
     {        
         // Retreive from cache if present
         if(this.useMetaCache)

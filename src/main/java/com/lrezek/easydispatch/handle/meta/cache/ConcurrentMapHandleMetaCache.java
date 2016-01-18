@@ -24,7 +24,7 @@
 package com.lrezek.easydispatch.handle.meta.cache;
 
 import com.lrezek.easydispatch.handle.meta.HandleMeta;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConcurrentMapHandleMetaCache implements HandleMetaCache
 {    
     /** Map of class -> annotation info. */
-    private final Map<Class, Collection<HandleMeta>> cache = new ConcurrentHashMap<>();
+    private final Map<Class, List<HandleMeta>> cache = new ConcurrentHashMap<>();
     
     /**
      * Determines if a cache entry exists for the specified class.
@@ -57,7 +57,7 @@ public class ConcurrentMapHandleMetaCache implements HandleMetaCache
      * @return The cached handle meta information, or null if not found.
      */
     @Override
-    public Collection<HandleMeta> get(Class cls) 
+    public List<HandleMeta> get(Class cls) 
     {
         return this.cache.get(cls);
     }
@@ -70,7 +70,7 @@ public class ConcurrentMapHandleMetaCache implements HandleMetaCache
      * @param handlerDataCollection The handle meta information for the class. 
      */
     @Override
-    public void put(Class cls, Collection<HandleMeta> handlerDataCollection) 
+    public void put(Class cls, List<HandleMeta> handlerDataCollection) 
     {
         this.cache.put(cls, handlerDataCollection);
     }

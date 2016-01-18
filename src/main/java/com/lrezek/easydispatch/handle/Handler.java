@@ -24,10 +24,11 @@
 package com.lrezek.easydispatch.handle;
 
 import com.lrezek.easydispatch.handle.meta.HandleMeta;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Object wrapper for an object with @Handles annotations.
@@ -37,7 +38,7 @@ import java.util.Map;
 public class Handler 
 {                
     /** Map of handled classes to handles. */
-    private final Map<Class, Collection<Handle>> handles = new HashMap<>();
+    private final Map<Class, List<Handle>> handles = new HashMap<>();
                 
     /** The underlying object. */
     private final Object object;
@@ -49,7 +50,7 @@ public class Handler
      * @param object The underlying object.
      * @param handleMetas The collection of handle metas.
      */
-    public Handler(Object object, Collection<HandleMeta> handleMetas)
+    public Handler(Object object, List<HandleMeta> handleMetas)
     {
         this.object = object;
         
@@ -71,7 +72,7 @@ public class Handler
      * @param object The object to handle.
      * @return Collection of associated handles.
      */
-    public Collection<Handle> getHandles(Object object)
+    public List<Handle> getHandles(Object object)
     {
         return this.handles.get(object.getClass());
     }
@@ -81,7 +82,7 @@ public class Handler
      * 
      * @return The collection of handled classes.
      */
-    public Collection<Class> getHandledClasses()
+    public Set<Class> getHandledClasses()
     {
         return this.handles.keySet();
     }

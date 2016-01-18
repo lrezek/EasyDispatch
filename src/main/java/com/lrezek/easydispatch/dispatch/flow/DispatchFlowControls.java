@@ -21,46 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.lrezek.easydispatch.handle.meta.cache;
-
-import com.lrezek.easydispatch.handle.meta.HandleMeta;
-import java.util.List;
+package com.lrezek.easydispatch.dispatch.flow;
 
 /**
- * Defines a handle meta cache. An implementation of this is used to get handle 
- * meta objects so we don't have to do reflection scanning for every handler. 
+ * Defines common flow controls.
  * 
  * @author Lukas Rezek
  */
-public interface HandleMetaCache
-{    
-    /**
-     * Determines if a cache entry exists for the specified class.
+public class DispatchFlowControls
+{
+    /** 
+     * The default "continue" dispatch flow control.
      * 
-     * @param cls The class.
-     * @return True if there is a cache entry, false otherwise.
+     * This flow control does not touch either iterator, allowing it to continue
+     * to the next handle or handler.
      */
-    boolean contains(Class cls);
-    
+    public static DispatchFlowControl CONTINUE = (handlerList, handlesList) -> {};
+            
     /**
-     * Gets the handle meta collection for the class, or null if not found.
+     * The "stop" dispatch flow control.
      * 
-     * @param cls The class.
-     * @return The cached handle meta information, or null if not found.
+     * This flow control sets both iterator indexes to the end, so no more 
+     * dispatching occurs.
      */
-    List<HandleMeta> get(Class cls);
-    
-    /**
-     * Puts a collection of handle meta objects on the cache, for the specified
-     * class.
-     * 
-     * @param cls The class.
-     * @param handlerDataCollection The handle meta information for the class. 
-     */
-    void put(Class cls, List<HandleMeta> handlerDataCollection);
-    
-    /**
-     * Clears the cache.
-     */
-    void clear();
+    public static DispatchFlowControl STOP = (handlerList, handlesList) -> {
+        handlesList.forEachRemaining(null);
+        handlerList.forEachRemaining(null);
+    };      
 }

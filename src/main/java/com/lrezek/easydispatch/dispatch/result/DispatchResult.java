@@ -23,6 +23,8 @@
  */
 package com.lrezek.easydispatch.dispatch.result;
 
+import com.lrezek.easydispatch.dispatch.flow.DispatchFlowControl;
+import com.lrezek.easydispatch.dispatch.flow.DispatchFlowControls;
 import com.lrezek.easydispatch.handle.Handler;
 
 /**
@@ -41,6 +43,9 @@ public class DispatchResult
     /** The return object of the invoked method. */
     private final Object result;
     
+    /** The flow control to execute after getting this dispatch result. */
+    private DispatchFlowControl dispatchFlowControl = DispatchFlowControls.CONTINUE;
+    
     /**
      * Constructs the result from a handler, dispatched object, and result.
      * 
@@ -53,6 +58,26 @@ public class DispatchResult
         this.handler = handler;
         this.dispatched = dispatched;
         this.result = result;
+    }
+    
+    /**
+     * Gets the dispatch flow control.
+     * 
+     * @return The flow control to execute while looping over handles.
+     */
+    public DispatchFlowControl getDispatchFlowControl()
+    {
+        return this.dispatchFlowControl;
+    }
+
+    /**
+     * Sets the dispatch flow control.
+     * 
+     * @param dispatchFlowControl  The flow control to execute while looping over handles.
+     */
+    public void setDispatchFlowControl(DispatchFlowControl dispatchFlowControl) 
+    {
+        this.dispatchFlowControl = dispatchFlowControl;
     }
     
     /**

@@ -23,8 +23,8 @@
  */
 package com.lrezek.easydispatch.dispatch.result;
 
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Defines a collection of dispatch results.
@@ -34,14 +34,14 @@ import java.util.LinkedList;
 public class DispatchResults
 {
     /** The underlying collection of dispatch results. */
-    private final Collection<DispatchResult> results = new LinkedList<>();
+    private final List<DispatchResult> results = new LinkedList<>();
 
     /**
      * Gets the underlying collection of dispatch results.
      * 
      * @return Collection of dispatch results.
      */
-    public Collection<DispatchResult> getResults() 
+    public List<DispatchResult> getResults() 
     {
         return results;
     }

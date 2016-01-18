@@ -28,8 +28,8 @@ import com.lrezek.easydispatch.annotation.HandlesContainer;
 import com.lrezek.easydispatch.exception.EasyDispatchReflectionException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -50,9 +50,9 @@ public class HandleMetaFactory
      * @return The collection of handle meta objects.
      * @throws EasyDispatchReflectionException If there is an annotation error in the class.
      */
-    public Collection<HandleMeta> createHandleMetas(Class cls) throws EasyDispatchReflectionException
+    public List<HandleMeta> createHandleMetas(Class cls) throws EasyDispatchReflectionException
     {
-        Collection<HandleMeta> annotationEntries = new LinkedList<>();
+        List<HandleMeta> annotationEntries = new LinkedList<>();
         
         // Populate the annotation information
         annotationEntries.addAll(this.createHandleMetasFromClassAnnotations(cls));
@@ -69,13 +69,13 @@ public class HandleMetaFactory
      * @return The collection of handle meta objects.
      * @throws EasyDispatchReflectionException If there is an annotation error in the class-level annotations.
      */
-    private Collection<HandleMeta> createHandleMetasFromClassAnnotations(Class cls) throws EasyDispatchReflectionException
+    private List<HandleMeta> createHandleMetasFromClassAnnotations(Class cls) throws EasyDispatchReflectionException
     {
         // Prepare collection to return
-        Collection<HandleMeta> toReturn = new LinkedList<>();
+        List<HandleMeta> toReturn = new LinkedList<>();
         
         // Read in @Handles annotations on the class
-        Collection<Handles> annotations = Arrays.asList((Handles[]) cls.getAnnotationsByType(Handles.class));
+        List<Handles> annotations = Arrays.asList((Handles[]) cls.getAnnotationsByType(Handles.class));
         
         // Loop over all the annotations
         for(Handles annotation : annotations)
@@ -125,13 +125,13 @@ public class HandleMetaFactory
      * @return The collection of handle meta objects.
      * @throws EasyDispatchReflectionException If there is an annotation error in the method-level annotations.
      */
-    private Collection<HandleMeta> createHandleMetasFromMethodAnnotations(Class cls) throws EasyDispatchReflectionException
+    private List<HandleMeta> createHandleMetasFromMethodAnnotations(Class cls) throws EasyDispatchReflectionException
     {
         // Prepare collection to return
-        Collection<HandleMeta> toReturn = new LinkedList<>();
+        List<HandleMeta> toReturn = new LinkedList<>();
 
         // Read in all the appropriate methodss
-        Collection<Method> methods = Arrays.stream(cls.getMethods())
+        List<Method> methods = Arrays.stream(cls.getMethods())
                 .filter(method -> !method.isBridge())
                 .filter(method -> method.isAnnotationPresent(Handles.class) || method.isAnnotationPresent(HandlesContainer.class))
                 .collect(Collectors.toList());
