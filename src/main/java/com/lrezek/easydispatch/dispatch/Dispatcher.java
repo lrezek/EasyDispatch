@@ -93,8 +93,11 @@ public class Dispatcher
                 // Add the result to the return object
                 results.add(dispatchResult);
                 
-                // Run the dispatch flow control in the result
-                dispatchResult.getDispatchFlowControl().execute(handlerIterator, handleIterator);
+                // Run the dispatch flow control in the result if required
+                if(dispatchResult.getDispatchFlowControl() != null)
+                {
+                    dispatchResult.getDispatchFlowControl().execute(handlerIterator, handleIterator);
+                }
             }
         }
         
@@ -139,8 +142,11 @@ public class Dispatcher
                 // Add the result to the return object
                 results.add(dispatchResult);
                 
-                // Run the dispatch flow control in the result
-                dispatchResult.getDispatchFlowControl().execute(handlerIterator, handleIterator);
+                // Run the dispatch flow control in the result if required
+                if(dispatchResult.getDispatchFlowControl() != null)
+                {
+                    dispatchResult.getDispatchFlowControl().execute(handlerIterator, handleIterator);
+                }
             }
         }
         

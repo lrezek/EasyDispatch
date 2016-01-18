@@ -36,7 +36,7 @@ public class DispatchFlowControls
      * This flow control does not touch either iterator, allowing it to continue
      * to the next handle or handler.
      */
-    public static DispatchFlowControl CONTINUE = (handlerList, handlesList) -> {};
+    public static DispatchFlowControl CONTINUE = null;
             
     /**
      * The "stop" dispatch flow control.
