@@ -43,6 +43,9 @@ public class Handle
     /** The meta information for this handle. */
     private final HandleMeta meta;
         
+    /** Whether the handle is parameterless. */
+    private final boolean parameterless;
+    
     /**
      * Constructs a handle from a parent handler and some meta information.
      * 
@@ -53,6 +56,9 @@ public class Handle
     {        
         this.handler = handler;
         this.meta = meta;
+        
+        // Determine if this wraps a method without paramters
+        this.parameterless = this.meta.getMethod().getParameterCount() == 0;
     }
     
     /**
@@ -70,14 +76,14 @@ public class Handle
             // If the method is accessible, just invoke it
             if(this.meta.getMethod().isAccessible())
             {
-                returnObject = this.meta.getMethod().invoke(this.handler.getObject(), toDispatch);
+                returnObject = this.invokeMethod(toDispatch);
             }
             
             // Not accessible, temporarily make it accessible
             else
             {
                 this.meta.getMethod().setAccessible(true);
-                returnObject = this.meta.getMethod().invoke(this.handler.getObject(), toDispatch);
+                returnObject = this.invokeMethod(toDispatch);
                 this.meta.getMethod().setAccessible(false);                
             }
         }
@@ -94,6 +100,26 @@ public class Handle
         
         // Return the dispatch result
         return new DispatchResult(this.handler, toDispatch, returnObject);
+    }
+    
+    /**
+     * Invokes the method with the parameter (or without any parameters if required).
+     * 
+     * @param toDispatch The object to dispatch.
+     * @return The result of the method.
+     * @throws IllegalAccessException If we can't access the method or the parameters are wrong.
+     * @throws InvocationTargetException If there's an exception in the method.
+     */
+    private Object invokeMethod(Object toDispatch) throws IllegalAccessException, InvocationTargetException
+    {
+        // If we have parameters, call the method with the paramters
+        if(!this.parameterless)
+        {
+            return this.meta.getMethod().invoke(this.handler.getObject(), toDispatch);
+        }
+        
+        // Otherwise, just call it
+        return this.meta.getMethod().invoke(this.handler.getObject());
     }
 
     /**

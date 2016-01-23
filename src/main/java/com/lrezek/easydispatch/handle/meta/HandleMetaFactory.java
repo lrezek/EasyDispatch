@@ -139,8 +139,8 @@ public class HandleMetaFactory
         // Loop over all the methods
         for(Method method : methods)
         {
-            // Must have 1 paramter total
-            if(method.getParameterCount() != 1)
+            // Must have 1 parameter or 0 parameters
+            if(method.getParameterCount() > 1)
             {
                 throw new EasyDispatchReflectionException("Method with name " + method.getName() + " has multiple parameters in " + cls.getName());
             }
@@ -150,24 +150,37 @@ public class HandleMetaFactory
             {
                 // Get the handled classes
                 Class[] handledClasses = annotation.value();
-
-                // None specified, try the parameter type
-                if(handledClasses == null || handledClasses.length == 0)
+                
+                // If the method has no parameters, just add it for every handled class
+                if(method.getParameterCount() == 0)
                 {
-                    handledClasses = new Class[1];
-                    handledClasses[0] = method.getParameterTypes()[0];
-                }
-
-                // Loop over them all and make this this method can actually accept the parameters
-                for(Class handledClass : handledClasses)
-                {
-                    // If the method can't handle this parameter type, error
-                    if(!method.getParameterTypes()[0].isAssignableFrom(handledClass))
+                    for(Class handledClass : handledClasses)
                     {
-                        throw new EasyDispatchReflectionException("Method annotated with name " + method.getName() + " cannot accept a parameter of type " + handledClass + " in " + cls.getName());
+                        toReturn.add(new HandleMeta(method, handledClass, annotation.dispatchStrategy()));
+                    }
+                }
+                
+                // The method has 1 parameter, make sure it's assignable before adding
+                else
+                {                   
+                    // No handled class specified, try the parameter type
+                    if(handledClasses == null || handledClasses.length == 0)
+                    {
+                        handledClasses = new Class[1];
+                        handledClasses[0] = method.getParameterTypes()[0];
                     }
 
-                    toReturn.add(new HandleMeta(method, handledClass, annotation.dispatchStrategy()));
+                    // Loop over them all and make this this method can actually accept the parameters
+                    for(Class handledClass : handledClasses)
+                    {
+                        // If the method can't handle this parameter type, error
+                        if(!method.getParameterTypes()[0].isAssignableFrom(handledClass))
+                        {
+                            throw new EasyDispatchReflectionException("Method annotated with name " + method.getName() + " cannot accept a parameter of type " + handledClass + " in " + cls.getName());
+                        }
+
+                        toReturn.add(new HandleMeta(method, handledClass, annotation.dispatchStrategy()));
+                    }
                 }
             }
         }
