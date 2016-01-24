@@ -99,18 +99,35 @@ public class HandleMetaFactory
             // Loop over all the handled classes
             for(Class handledClass : handledClasses)
             {
+                // Initialize method
+                Method method = null;
+                
                 try
                 {
-                    // Get the best method
-                    Method method = cls.getMethod(methodName, handledClass);
-                    
-                    // Construct the AnnotationEntry
-                    toReturn.add(new HandleMeta(method, handledClass, annotation.dispatchStrategy()));                    
+                    // Get the best method with the parameter type
+                    method = cls.getMethod(methodName, handledClass);                   
                 }
-                catch(NoSuchMethodException e)
+                catch(NoSuchMethodException ignored) {}
+                
+                // Could not find method, try one without parameters
+                if(method == null)
                 {
-                    throw new EasyDispatchReflectionException("Failed to find method with name " + methodName + " with exactly 1 parameter of type " + handledClass + " in " + cls.getName(), e);
+                    try
+                    {
+                        // Try to get a method with no parameters
+                        method = cls.getMethod(methodName); 
+                    }
+                    catch(NoSuchMethodException ignored) {}
                 }
+                
+                // Still no matching method, exception
+                if(method == null)
+                {
+                    throw new EasyDispatchReflectionException("Failed to find method with name " + methodName + " with 0 parameters or exactly 1 parameter of type " + handledClass + " in " + cls.getName());
+                }
+                
+                // Construct the AnnotationEntry
+                toReturn.add(new HandleMeta(method, handledClass, annotation.dispatchStrategy())); 
             }
         }
         
