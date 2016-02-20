@@ -25,6 +25,7 @@ package com.lrezek.easydispatch;
 
 import com.lrezek.easydispatch.dispatch.Dispatcher;
 import com.lrezek.easydispatch.dispatch.result.DispatchResults;
+import com.lrezek.easydispatch.dispatch.strategy.AsynchronousDispatchStrategy;
 import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategyRegistry;
 import com.lrezek.easydispatch.handle.HandlerRegistry;
 import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategy;
@@ -131,6 +132,17 @@ public class EasyDispatch
     public DispatchResults synchronousDispatch(Object object)
     {
         return this.dispatchWith(object, SynchronousDispatchStrategy.class);
+    }
+    
+    /**
+     * Shortcut for a fully asynchronous dispatch.
+     * 
+     * @param object The object to dispatch.
+     * @return The dispatch results.
+     */        
+    public DispatchResults asynchronousDispatch(Object object)
+    {
+        return this.dispatchWith(object, AsynchronousDispatchStrategy.class);
     }
    
     /**

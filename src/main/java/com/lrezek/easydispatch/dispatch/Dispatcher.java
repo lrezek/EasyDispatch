@@ -25,6 +25,7 @@ package com.lrezek.easydispatch.dispatch;
 
 import com.lrezek.easydispatch.dispatch.result.DispatchResult;
 import com.lrezek.easydispatch.dispatch.result.DispatchResults;
+import com.lrezek.easydispatch.dispatch.strategy.AsynchronousDispatchStrategy;
 import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategy;
 import com.lrezek.easydispatch.dispatch.strategy.DispatchStrategyRegistry;
 import com.lrezek.easydispatch.dispatch.strategy.SynchronousDispatchStrategy;
@@ -50,6 +51,7 @@ public class Dispatcher
     {
         this.dispatchStrategies
                 .add(new SynchronousDispatchStrategy())         // Add the built in dispatch strategies
+                .add(new AsynchronousDispatchStrategy())
                 .setDefault(SynchronousDispatchStrategy.class); // Set the default dispatch strategy
     }
     
