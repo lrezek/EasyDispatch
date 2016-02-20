@@ -133,6 +133,11 @@ public class EasyDispatch
         return this.dispatchWith(object, SynchronousDispatchStrategy.class);
     }
    
+    /**
+     * Gets the dispatcher.
+     * 
+     * @return The dispatcher.
+     */
     public Dispatcher dispatcher()
     {
         return this.dispatcher;

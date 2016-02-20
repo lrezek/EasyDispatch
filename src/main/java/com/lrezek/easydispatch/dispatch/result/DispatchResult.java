@@ -25,7 +25,10 @@ package com.lrezek.easydispatch.dispatch.result;
 
 import com.lrezek.easydispatch.dispatch.flow.DispatchFlowControl;
 import com.lrezek.easydispatch.dispatch.flow.DispatchFlowControls;
+import com.lrezek.easydispatch.handle.Handle;
 import com.lrezek.easydispatch.handle.Handler;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * Result object for a single dispatch invocation.
@@ -42,7 +45,7 @@ public class DispatchResult
     
     /** The return object of the invoked method. */
     private final Object result;
-    
+            
     /** The flow control to execute after getting this dispatch result. */
     private DispatchFlowControl dispatchFlowControl = DispatchFlowControls.CONTINUE;
     
@@ -56,6 +59,20 @@ public class DispatchResult
     public DispatchResult(Handler handler, Object dispatched, Object result)
     {
         this.handler = handler;
+        this.dispatched = dispatched;
+        this.result = result;
+    }
+    
+    /**
+     * Constructs the result from a handle, dispatched object, and result.
+     * 
+     * @param handle The handle that invoked the method.
+     * @param dispatched The object that was dispatched.
+     * @param result The return object of the invocation.
+     */
+    public DispatchResult(Handle handle, Object dispatched, Object result)
+    {
+        this.handler = handle.getHandler();
         this.dispatched = dispatched;
         this.result = result;
     }
@@ -87,7 +104,7 @@ public class DispatchResult
      */
     public Handler getHandler() 
     {
-        return handler;
+        return this.handler;
     }
 
     /**
@@ -97,7 +114,7 @@ public class DispatchResult
      */
     public Object getDispatched() 
     {
-        return dispatched;
+        return this.dispatched;
     }
     
     /**
@@ -107,6 +124,19 @@ public class DispatchResult
      */
     public Object getResult() 
     {
-        return result;
+        // If it's a future, get the result from the future
+        if(this.result instanceof Future)
+        {
+            try 
+            {
+                return ((Future<DispatchResult>)this.result).get().getResult();
+            } 
+            catch (ExecutionException | InterruptedException | ClassCastException ignored) 
+            {
+                // Fall back to this result if this fails
+            }
+        }
+        
+        return this.result;
     }
 }
