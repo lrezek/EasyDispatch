@@ -8,6 +8,10 @@
 *.iml
 *.iws
 
+# Netbeans
+nb-configuration.xml
+nbactions.xml
+
 # Mac
 .DS_Store
 
